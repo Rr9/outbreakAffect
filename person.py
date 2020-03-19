@@ -1,5 +1,5 @@
-import random
 import math
+import random
 
 '''
 Notes
@@ -20,7 +20,7 @@ class Person():
     # list to make life easier to do calculations in mutate()
     mutations = [0, undiagDays, undiagDays + asymDays, undiagDays + asymDays + symDays]
     colors = ['g', 'y', 'tab:orange', 'r']
-    speeds = [4, 2, 0]      #[outside, hospital, home] movement speeds
+    speeds = [20, 10, 0]      #[outside, hospital, home] movement speeds
 
     def __init__(self, infectionState, xlim, ylim, homekit=False, infectionProbOverride=0, deviderWidth=5):
         self.inf = infectionState
@@ -33,6 +33,10 @@ class Person():
         self.homekit = homekit  # if this is false there is a hospital
         self.hospital = not homekit
         self.speed = self.speeds[0]
+
+        self.xlim = xlim
+        self.xoutsidelim = (xlim//2)-deviderWidth
+        self.ylim = ylim
 
         # this is here to model healthcare workers that wear ppe (if we want later)
         self.infectionProb = infectionProbOverride if infectionProbOverride != 0 else self.infectionProb
@@ -64,8 +68,8 @@ class Person():
         pass
 
     def moveOutside(self):
-        self.loc[0] += random.randint(-1*self.speed, self.speed)
-        self.loc[1] += random.randint(-1*self.speed, self.speed)
+        self.pos[0] = (self.pos[0] + random.uniform(-1*self.speed, self.speed)) % self.xoutsidelim
+        self.pos[1] = (self.pos[1] + random.uniform(-1*self.speed, self.speed)) % self.ylim
 
     def toHome(self):
         self.speed = self.speeds[2]     #home speed
