@@ -24,7 +24,7 @@ def step():
         person.step()
 
 
-def drawScene(frameCount):
+def drawScene():
     positions = []
     colors = []
 
@@ -53,7 +53,7 @@ scatter = plt.scatter([],[], s=DOTSIZE)
 
 def anim(i):
     step()
-    drawScene(i)
+    drawScene()
 
 
 ani = animation.FuncAnimation(fig, anim,  interval=500, frames=10, blit=False)
