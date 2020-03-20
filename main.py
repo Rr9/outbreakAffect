@@ -5,13 +5,14 @@ import matplotlib.pyplot as plt
 
 from person import Person
 
-NUMPERSONS = 100
-INFECTED_START = 0.4
+NUMPERSONS = 500
+INFECTED_START = 0.03
 XAXIS = 4000
 YAXIS = 2000
-DIVIDERWIDTH = 5
-DOTSIZE = 8
-COLORS = ['g', 'y', 'tab:orange', 'r']
+DIVIDERWIDTH = 4
+DOTSIZE = 7
+COLORS = ['g', 'gold', 'tab:orange', 'r', 'b']
+INFECTIONRAD = 15  #
 
 allpersons = []
 positions = []
@@ -19,28 +20,41 @@ plots = []
 
 
 # infection states 0,1,2,3
-def step():
+def stepAll():
     for person in allpersons:
         person.step()
 
 
-def drawScene():
+def stepScene():
     positions = []
     colors = []
+    notinfected = []
+    infected = []
 
-    for i in allpersons:
-        colors.append(COLORS[i.inf])
-        positions.append(i.pos)
+    for person in allpersons:
+        infection = person.inf
+        colors.append(COLORS[infection])
+        positions.append(person.pos)
+        if infection<4:
+            if person.inf==0:
+                notinfected.append(person)
+            else:
+                infected.append(person)
 
     scatter.set_color(colors)
     scatter.set_offsets(positions)
+
+    for inf in infected:
+        for good in notinfected:
+            if inf.distance(good) < INFECTIONRAD:
+                good.contract()
 
     return scatter
 
 
 for i in range(NUMPERSONS):
     infection = 1 if random.random() < INFECTED_START else 0
-    allpersons.append(Person(infection, XAXIS, YAXIS))
+    allpersons.append(Person(infection, XAXIS, YAXIS, homekit=True))
 
 fig, ax = plt.subplots()
 
@@ -52,9 +66,9 @@ ax.text(XAXIS // 1.3, YAXIS, "Home", fontsize=10, horizontalalignment='center')
 scatter = plt.scatter([],[], s=DOTSIZE)
 
 def anim(i):
-    step()
-    drawScene()
+    stepAll()
+    stepScene()
 
 
-ani = animation.FuncAnimation(fig, anim,  interval=500, frames=10, blit=False)
+ani = animation.FuncAnimation(fig, anim,  interval=300, frames=10, blit=False)
 plt.show()
