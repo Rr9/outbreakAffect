@@ -3,7 +3,7 @@ import random
 
 '''
 Notes
-0-Uninfected, 1-Undiagnosable, 2-Asymptomatic, 3-Recovered
+0-Uninfected, 1-Undiagnosable, 2-Asymptomatic, 3-Symptomatic 4-Recovered
 '''
 
 
@@ -19,7 +19,7 @@ class Person():
     symDays = 7 * day
     # list to make life easier to do calculations in mutate()
     mutations = [0, undiagDays, undiagDays + asymDays, undiagDays + asymDays + symDays, math.inf]
-    colors = ['g', 'y', 'tab:orange', 'r', 'b']
+    colors = ['g', 'gold', 'tab:orange', 'r', 'b']
     speeds = [30, 10, 5]      #[outside, hospital, home] movement speeds
 
     def __init__(self, infectionState, xlim, ylim, homekit=False, infectionProbOverride=0, deviderWidth=5):
@@ -107,7 +107,7 @@ class Person():
 
     def toHospital(self):
         if not self.homekit:                # if this is sim with hospital
-            if self.inf > 2:                # if person is symptomatic
+            if 4> self.inf > 2:                # if person is symptomatic
                 self.speed = self.speeds[1] # hospital speed
                 self.changePlaces(self.xMidLim, self.xEndLim, self.yEndLim)
 
@@ -118,9 +118,9 @@ class Person():
                 self.changePlaces(0, self.xEndLim, self.yEndLim)    # go back outside
 
     def leaveHospital(self):
-        if self.place==1 and (not self.homekit):# if in hospital
-            if self.inf>3:                      # if recovered
-                self.speed = self.speeds[0]     # outside speed
+        if self.place==1 and (not self.homekit):    # if in hospital
+            if self.inf>3:                          # if recovered
+                self.speed = self.speeds[0]         # outside speed
                 self.changePlaces(0, self.xEndLim, self.yEndLim)    # go back outside
 
     # def getPos(self):
@@ -129,6 +129,6 @@ class Person():
     def distance(self, other):
         return math.sqrt(((self.pos[0] - other.pos[0]) ** 2) + ((self.pos[1] - other.pos[1]) ** 2))
 
-    @staticmethod
-    def radius(p1, p2):
-        return math.sqrt(((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2))
+    # @staticmethod
+    # def radius(p1, p2):
+    #     return math.sqrt(((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2))

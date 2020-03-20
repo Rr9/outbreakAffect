@@ -11,8 +11,9 @@ XAXIS = 4000
 YAXIS = 2000
 DIVIDERWIDTH = 4
 DOTSIZE = 7
-COLORS = ['g', 'gold', 'tab:orange', 'r', 'b']
+COLORS = ['g', 'gold', 'tab:orange', 'r', 'purple']
 INFECTIONRAD = 15  #
+HOMEKIT = False
 
 allpersons = []
 positions = []
@@ -54,21 +55,27 @@ def stepScene():
 
 for i in range(NUMPERSONS):
     infection = 1 if random.random() < INFECTED_START else 0
-    allpersons.append(Person(infection, XAXIS, YAXIS, homekit=True))
+    allpersons.append(Person(infection, XAXIS, YAXIS, homekit=HOMEKIT))
 
-fig, ax = plt.subplots()
+# fig, (ax1, ax2) = plt.subplots(2)
+fig, ax1 = plt.subplots()
 
-ax.set_xlim(0, XAXIS)  # xlim=(0, XAXIS), ylim=(0, YAXIS)
-ax.set_ylim(0, YAXIS)
-ax.axvline(XAXIS / 2, linewidth=(DIVIDERWIDTH - 2), color='b')
-ax.text(XAXIS // 4 - 100, YAXIS, "Outside", fontsize=10, horizontalalignment='center')
-ax.text(XAXIS // 1.3, YAXIS, "Home", fontsize=10, horizontalalignment='center')
-scatter = plt.scatter([],[], s=DOTSIZE)
+ax1.set_xlim(0, XAXIS)  # xlim=(0, XAXIS), ylim=(0, YAXIS)
+ax1.set_ylim(0, YAXIS)
+ax1.set_xticklabels([])
+ax1.set_yticklabels([])
+ax1.axvline(XAXIS / 2, linewidth=(DIVIDERWIDTH - 2), color='b')
+ax1.text(XAXIS // 4 - 100, YAXIS, "Outside", fontsize=10, horizontalalignment='center')
+if HOMEKIT:
+    ax1.text(XAXIS // 1.3 -70, YAXIS, "Home", fontsize=10, horizontalalignment='center')
+else:
+    ax1.text(XAXIS // 1.3 -100, YAXIS, "Hospital", fontsize=100, horizontalalignment='center')
+scatter = ax1.scatter([],[], s=DOTSIZE)
 
 def anim(i):
     stepAll()
     stepScene()
 
 
-ani = animation.FuncAnimation(fig, anim,  interval=300, frames=10, blit=False)
+ani = animation.FuncAnimation(fig, anim,  interval=10, frames=10, blit=False)
 plt.show()
