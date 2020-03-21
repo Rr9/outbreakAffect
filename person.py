@@ -4,6 +4,7 @@ import random
 '''
 Notes
 0-Uninfected, 1-Undiagnosable, 2-Asymptomatic, 3-Symptomatic 4-Recovered
+!!! Be careful when adding new states !!!
 '''
 
 
@@ -21,6 +22,8 @@ class Person():
     mutations = [0, undiagDays, undiagDays + asymDays, undiagDays + asymDays + symDays, math.inf]
     colors = ['g', 'gold', 'tab:orange', 'r', 'b']
     speeds = [30, 10, 5]      #[outside, hospital, home] movement speeds
+
+    midlinewidth = 15
 
     def __init__(self, infectionState, xlim, ylim, homekit=False, infectionProbOverride=0, deviderWidth=5):
         self.inf = infectionState
@@ -42,18 +45,26 @@ class Person():
         # this is here to model healthcare workers that wear ppe (if we want later)
         self.infectionProb = infectionProbOverride if infectionProbOverride != 0 else self.infectionProb
 
-    # create starting point for this person
-    def initialPosition(self, xStartLim, yStartLim):
-        return [int(random.uniform(0, xStartLim)), int(random.uniform(0, yStartLim))]
+    '''
+    Create starting point for this person
+        within x=(0, xEndLim) Y=(0, yEndLim)
+        everyone starts off outside
+    '''
+    def initialPosition(self, xEndLim, yEndLim):
+        return [int(random.uniform(0, xEndLim)), int(random.uniform(0, yEndLim))]
 
-    #gets disease
+    '''
+    Contracts disease 
+    '''
     def contract(self):  # catch disease
         # get infected = if not infected and random num is > than probability
         if (self.inf == 0) and (random.random() > self.infectionProb):
             self.inf = 1
             self.diseaseAge=0
 
-    #incrase severity of disease
+    '''
+    Incrase severity of disease
+    '''
     def mutate(self):
         if self.inf > 0:  # if you are infected
             # if age(days) >= amount of days it takes to move to the next state
@@ -61,7 +72,9 @@ class Person():
             if self.diseaseAge >= self.mutations[self.inf]:
                 self.inf += 1
 
-    #what happens in one timesep
+    '''
+    timesep each person 
+    '''
     def step(self):
         self.age += 1
         self.daysInPlace+=1
@@ -73,31 +86,60 @@ class Person():
         if self.place==0:   # if person is outside
             self.toHome()
             self.toHospital()
-        else:
+        else:               #if person in inside(hospital or home)
             self.leaveHome()
             self.leaveHospital()
+
         self.mutate()
 
+    '''
+    Defines how people move, called in step()
+    '''
     def move(self):
         if self.place==0:
             self.moveOutside()
         else:
             self.moveInside()
 
+    '''
+    Rules on how to move outside 
+        Move X within left border(0) and the mid line (50%, xMidLim)
+        Move Y within top and bottom 
+        Warp around 
+    '''
     def moveOutside(self):
-        self.pos[0] = (self.pos[0] + random.uniform(-1*self.speed, self.speed)) % self.xMidLim
+        self.pos[0] = (self.pos[0] + random.uniform(-1*self.speed, self.speed)) % (self.xMidLim-self.midlinewidth)
         self.pos[1] = (self.pos[1] + random.uniform(-1*self.speed, self.speed)) % self.yEndLim
 
+    '''
+    Rules on how to move Inside 
+        Move X within left border(50%, xMidLim) and the mid line (end, xEndLim)
+        Move Y within top and bottom 
+        Warp around between the 2 x walls and y edges
+    '''
     def moveInside(self):
         x = (self.pos[0] + random.uniform(-1*self.speed, self.speed)) % self.xEndLim
-        self.pos[0] = x if x>self.xMidLim else (self.xEndLim-(self.xMidLim-x))
+        self.pos[0] = x if (x>(self.xMidLim-self.midlinewidth)) else (self.xEndLim-(self.xMidLim-x))
         self.pos[1] = (self.pos[1] + random.uniform(-1*self.speed, self.speed)) % self.yEndLim
 
+    '''
+    Goes from outside -> inside, inside -> outisde
+        Spawns person randomly between X=(xstart, xlim) and Y=(0, ylim)
+        reset counter for how long person has lived in this palce
+    '''
     def changePlaces(self, xstart, xlim, ylim):
         self.pos = [int(random.uniform(xstart, xlim)), int(random.uniform(0, ylim))]
-        self.place = 1 if self.place==0 else 0 # change state to home/hospital
-        self.daysInPlace = 0
+        self.place = 1 if self.place==0 else 0      # change state to home/hospital
+        self.daysInPlace = 0                        # reset how long has been spent here
 
+    '''
+    Move person to home under these conditions
+        Sim is about home and outside
+        If at the end of the day 
+            person is infected Asymptomatically 
+            
+        Move person, change speed
+    '''
     def toHome(self):
         if self.homekit:                    # if this is sim with kits at home
             if self.age % self.day == 0:    # check yourself at the end of every day
@@ -105,27 +147,53 @@ class Person():
                     self.speed = self.speeds[2]     # home speed
                     self.changePlaces(self.xMidLim, self.xEndLim, self.yEndLim)
 
+    '''
+    Move person to hospital under these conditions
+        Sim is about hospital and outside
+            person is infected Symptomatically 
+            
+        Move person, change speed  
+    '''
     def toHospital(self):
         if not self.homekit:                # if this is sim with hospital
             if 4> self.inf > 2:                # if person is symptomatic
                 self.speed = self.speeds[1] # hospital speed
                 self.changePlaces(self.xMidLim, self.xEndLim, self.yEndLim)
 
+    '''
+    Move to home->outside under these conditions
+        If at home and sim is about home&outside
+            if cured or need to do groceries            
+        
+        Move person, change speed  
+    '''
     def leaveHome(self):
         if self.place==1 and self.homekit:          # if at home
             if self.inf>3 or self.daysInPlace>self.homeOutFreq:   # if they need to go outside || cured
                 self.speed = self.speeds[0]         # outside speed
                 self.changePlaces(0, self.xEndLim, self.yEndLim)    # go back outside
 
+    '''
+    Move to home->outside under these conditions
+        If at hospital and sim is about hospital&outside
+            if cured
+
+        Move person, change speed  
+    '''
     def leaveHospital(self):
         if self.place==1 and (not self.homekit):    # if in hospital
             if self.inf>3:                          # if recovered
+                # TODO ^^ add condition to move perosn outside if hospital over carrying capacity
                 self.speed = self.speeds[0]         # outside speed
                 self.changePlaces(0, self.xEndLim, self.yEndLim)    # go back outside
 
     # def getPos(self):
     #     return self.pos, self.inf
 
+    '''
+    Return distance from this person to other person given 
+    @:param other - other person
+    '''
     def distance(self, other):
         return math.sqrt(((self.pos[0] - other.pos[0]) ** 2) + ((self.pos[1] - other.pos[1]) ** 2))
 
