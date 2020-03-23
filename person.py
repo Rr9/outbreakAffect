@@ -23,25 +23,27 @@ class Person():
     colors = ['g', 'gold', 'tab:orange', 'r', 'b']
     speeds = [30, 10, 5]      #[outside, hospital, home] movement speeds
 
-    def __init__(self, infectionState, xlim, ylim, homekit=False, infectionProbOverride=0, dividerWidth=5):
+    midlinewidth = 15
+
+    def __init__(self, infectionState, xlim, ylim, homekit=False, infectionProbOverride=0, deviderWidth=5):
         self.inf = infectionState
         # 0-Uninfected, 1-Undiagnosable, 2-Asymptomatic, 3-Symptomatic 4-Recovered
         self.age = 0            # days this person has lived for
         self.diseaseAge = 0     # days since person got disease
 
-        self.xMidLim = (xlim//2)-dividerWidth
+        self.xMidLim = (xlim//2)-deviderWidth
         self.xEndLim = xlim
         self.yEndLim = ylim
         self.pos = self.initialPosition(self.xMidLim, ylim)  # [x,y]
         self.place = 0          #0 outside, 1 insde
-        self.daysInPlace = 0    #how many days this person has spent in current location
+        self.daysInPlace = 0    #how many days this person has spent in this palace
 
         self.homekit = homekit  # if this is false there is a hospital
-        #self.hospital = not homekit
+        self.hospital = not homekit
         self.speed = self.speeds[0]
 
         # this is here to model healthcare workers that wear ppe (if we want later)
-        #self.infectionProb = infectionProbOverride if infectionProbOverride != 0 else self.infectionProb
+        self.infectionProb = infectionProbOverride if infectionProbOverride != 0 else self.infectionProb
 
     '''
     Create starting point for this person
@@ -70,7 +72,9 @@ class Person():
             if self.diseaseAge >= self.mutations[self.inf]:
                 self.inf += 1
 
-    #what happens in one timestep
+    '''
+    timesep each person 
+    '''
     def step(self):
         self.age += 1
         self.daysInPlace+=1

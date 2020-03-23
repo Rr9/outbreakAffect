@@ -1,4 +1,5 @@
 import random, matplotlib
+import seaborn as sns
 
 matplotlib.use( 'tkagg' )
 import matplotlib.animation as animation
@@ -90,6 +91,7 @@ if HOMEKIT:
     ax1.text(XAXIS // 1.3 -70, YAXIS+10, "Home", fontsize=10, horizontalalignment='center')
 else:
     ax1.text(XAXIS // 1.3 -100, YAXIS, "Hospital", fontsize=10, horizontalalignment='center')
+sns.set()
 scatter = ax1.scatter([],[], s=DOTSIZE)
 
 
