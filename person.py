@@ -10,14 +10,14 @@ Notes
 
 class Person():
     day = 7                # cycles for one day
-    # infectionRad = 1        #
-    infectionProb = .5      # probability of getting infected upon contact
+    # infectionRad = 1      #
+    infectionProb = 1      # probability of getting infected upon contact
     homeOutFreq = 7 * day   # infected people leave home every n days
 
     # mutation coeffs
-    undiagDays = 4 * day
+    undiagDays = 1 * day
     asymDays = 10 * day
-    symDays = 7 * day
+    symDays = 20 * day
     # list to make life easier to do calculations in mutate()
     mutations = [0, undiagDays, undiagDays + asymDays, undiagDays + asymDays + symDays, math.inf]
     colors = ['g', 'gold', 'tab:orange', 'r', 'b']
@@ -25,18 +25,20 @@ class Person():
 
     midlinewidth = 15
 
-    def __init__(self, infectionState, xlim, ylim, homekit=False, infectionProbOverride=0, deviderWidth=5):
+    def __init__(self, infectionState, xlim, ylim, divider, homekit=False, infectionProbOverride=0, deviderWidth=5, size=20, baseRadius=20):
         self.inf = infectionState
         # 0-Uninfected, 1-Undiagnosable, 2-Asymptomatic, 3-Symptomatic 4-Recovered
         self.age = 0            # days this person has lived for
         self.diseaseAge = 0     # days since person got disease
 
-        self.xMidLim = (xlim//2)-deviderWidth
+        self.xMidLim = divider-deviderWidth
         self.xEndLim = xlim
         self.yEndLim = ylim
         self.pos = self.initialPosition(self.xMidLim, ylim)  # [x,y]
         self.place = 0          #0 outside, 1 insde
         self.daysInPlace = 0    #how many days this person has spent in this palace
+        self.size = size+5
+        self.spreadRadius = [baseRadius, baseRadius+20]
 
         self.homekit = homekit  # if this is false there is a hospital
         self.hospital = not homekit
@@ -58,7 +60,7 @@ class Person():
     '''
     def contract(self):  # catch disease
         # get infected = if not infected and random num is > than probability
-        if (self.inf == 0) and (random.random() > self.infectionProb):
+        if (self.inf == 0) and (random.random() <= self.infectionProb):
             self.inf = 1
             self.diseaseAge=0
 
@@ -71,6 +73,13 @@ class Person():
             # move up in state
             if self.diseaseAge >= self.mutations[self.inf]:
                 self.inf += 1
+
+            if 1<=self.inf<3:
+                self.radius=self.spreadRadius[0]
+            elif self.inf==3:
+                self.radius==self.spreadRadius[1]
+            else:
+                self.radius==0
 
     '''
     timesep each person 
@@ -85,10 +94,10 @@ class Person():
 
         if self.place==0:   # if person is outside
             self.toHome()
-            self.toHospital()
+            # self.toHospital() #   !! this is called in main now !!
         else:               #if person in inside(hospital or home)
             self.leaveHome()
-            self.leaveHospital()
+            # self.leaveHospital()  !! moved to main !!
 
         self.mutate()
 
@@ -119,7 +128,7 @@ class Person():
     '''
     def moveInside(self):
         x = (self.pos[0] + random.uniform(-1*self.speed, self.speed)) % self.xEndLim
-        self.pos[0] = x if (x>(self.xMidLim-self.midlinewidth)) else (self.xEndLim-(self.xMidLim-x))
+        self.pos[0] = x if (x>(self.xMidLim+self.size)) else (self.xEndLim-(self.xMidLim+self.size-x))
         self.pos[1] = (self.pos[1] + random.uniform(-1*self.speed, self.speed)) % self.yEndLim
 
     '''
@@ -148,6 +157,14 @@ class Person():
                     self.changePlaces(self.xMidLim, self.xEndLim, self.yEndLim)
 
     '''
+    Checks if this person should be hospitalised using rules
+    '''
+    def shouldHospitalise(self):
+        if self.place==0 and (not self.homekit):                # if this is sim with hospital
+                return 4> self.inf > 2          # if person is symptomatic
+        return False
+
+    '''
     Move person to hospital under these conditions
         Sim is about hospital and outside
             person is infected Symptomatically 
@@ -155,10 +172,10 @@ class Person():
         Move person, change speed  
     '''
     def toHospital(self):
-        if not self.homekit:                # if this is sim with hospital
-            if 4> self.inf > 2:                # if person is symptomatic
-                self.speed = self.speeds[1] # hospital speed
-                self.changePlaces(self.xMidLim, self.xEndLim, self.yEndLim)
+        # if not self.homekit:                # if this is sim with hospital
+        #     if 4> self.inf > 2:                # if person is symptomatic
+        self.speed = self.speeds[1] # hospital speed
+        self.changePlaces(self.xMidLim, self.xEndLim, self.yEndLim)
 
     '''
     Move to home->outside under these conditions
@@ -173,6 +190,11 @@ class Person():
                 self.speed = self.speeds[0]         # outside speed
                 self.changePlaces(0, self.xEndLim, self.yEndLim)    # go back outside
 
+    def shouldDischarge(self):
+        if self.place==1 and (not self.homekit):    # if in hospital
+            return self.inf>3                       # if recovered
+        return False
+
     '''
     Move to home->outside under these conditions
         If at hospital and sim is about hospital&outside
@@ -183,7 +205,6 @@ class Person():
     def leaveHospital(self):
         if self.place==1 and (not self.homekit):    # if in hospital
             if self.inf>3:                          # if recovered
-                # TODO ^^ add condition to move perosn outside if hospital over carrying capacity
                 self.speed = self.speeds[0]         # outside speed
                 self.changePlaces(0, self.xEndLim, self.yEndLim)    # go back outside
 
