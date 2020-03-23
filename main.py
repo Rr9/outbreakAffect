@@ -1,5 +1,6 @@
-import random
+import random, matplotlib
 
+matplotlib.use( 'tkagg' )
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 
@@ -10,7 +11,7 @@ INFECTED_START = 0.03
 XAXIS = 4000
 YAXIS = 2000
 DIVIDERWIDTH = 4
-DOTSIZE = 7
+DOTSIZE = 20
 COLORS = ['g', 'gold', 'tab:orange', 'r', 'purple']
 INFECTIONRAD = 15  #
 HOMEKIT = False
@@ -69,7 +70,7 @@ ax1.text(XAXIS // 4 - 100, YAXIS, "Outside", fontsize=10, horizontalalignment='c
 if HOMEKIT:
     ax1.text(XAXIS // 1.3 -70, YAXIS, "Home", fontsize=10, horizontalalignment='center')
 else:
-    ax1.text(XAXIS // 1.3 -100, YAXIS, "Hospital", fontsize=100, horizontalalignment='center')
+    ax1.text(XAXIS // 1.3 -100, YAXIS, "Hospital", fontsize=10, horizontalalignment='center')
 scatter = ax1.scatter([],[], s=DOTSIZE)
 
 def anim(i):
@@ -77,5 +78,5 @@ def anim(i):
     stepScene()
 
 
-ani = animation.FuncAnimation(fig, anim,  interval=10, frames=10, blit=False)
+ani = animation.FuncAnimation(fig, anim,  interval=70, frames=10, blit=False)
 plt.show()
