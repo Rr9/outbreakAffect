@@ -9,7 +9,7 @@ Notes
 
 
 class Person():
-    day = 7                # cycles for one day
+    day = 20                # cycles for one day
     # infectionRad = 1      #
     infectionProb = 1      # probability of getting infected upon contact
     homeOutFreq = 7 * day   # infected people leave home every n days
@@ -21,7 +21,7 @@ class Person():
     # list to make life easier to do calculations in mutate()
     mutations = [0, undiagDays, undiagDays + asymDays, undiagDays + asymDays + symDays, math.inf]
     colors = ['g', 'gold', 'tab:orange', 'r', 'b']
-    speeds = [30, 25, 5]      #[outside, hospital, home] movement speeds
+    speeds = [35, 25, 30]      #[outside, hospital, home] movement speeds
 
     midlinewidth = 15
 
@@ -29,7 +29,8 @@ class Person():
         self.inf = infectionState
         # 0-Uninfected, 1-Undiagnosable, 2-Asymptomatic, 3-Symptomatic 4-Recovered
         self.age = 0            # days this person has lived for
-        self.diseaseAge = 0     # days since person got disease
+        self.diseaseAge = 0     # days since person got diseasese
+        # self.care = self.symDays
 
         self.xMidLim = divider-deviderWidth
         self.xEndLim = xlim
@@ -48,6 +49,7 @@ class Person():
         self.infectionProb = infectionProbOverride if infectionProbOverride != 0 else self.infectionProb
 
         self.pos = self.initialPosition(self.xMidLim, ylim)  # [x,y]
+        self.actualPos = self.determinePosition()
 
     '''
     Create starting point for this person
@@ -71,17 +73,22 @@ class Person():
     '''
     def mutate(self):
         if self.inf > 0:  # if you are infected
+            self.diseaseAge += 1
+            if self.inf<3:                          # if not symptomatic
+                # self.diseaseAge+=1                  # disease age automatically goes up by 1
+                self.radius=self.spreadRadius[1]
+            elif self.inf==3:                       # if you are symptomatic
+                self.radius==self.spreadRadius[2]
+                # if self.actualPos==1:               # only heal if youre at home or hopsital
+                #     self.diseaseAge += 1
+            else:
+                self.radius==self.spreadRadius[0]
+
             # if age(days) >= amount of days it takes to move to the next state
             # move up in state
             if self.diseaseAge >= self.mutations[self.inf]:
                 self.inf += 1
 
-            if 1<=self.inf<3:
-                self.radius=self.spreadRadius[1]
-            elif self.inf==3:
-                self.radius==self.spreadRadius[2]
-            else:
-                self.radius==self.spreadRadius[0]
 
     '''
     timesep each person 
@@ -89,10 +96,13 @@ class Person():
     def step(self):
         self.age += 1
         self.daysInPlace+=1
-        if(self.inf>0):
-            self.diseaseAge+=1
+
+        # if(self.inf>0):       #moved to mutate
+        #     self.diseaseAge+=1
 
         self.move()
+        # self.determinePosition()  #to determine where they actually are
+        self.mutate()
 
         if self.place==0:   # if person is outside
             self.toHome()
@@ -101,7 +111,6 @@ class Person():
             self.leaveHome()
             # self.leaveHospital()  !! moved to main !!
 
-        self.mutate()
 
     '''
     Defines how people move, called in step()
@@ -139,7 +148,6 @@ class Person():
         yPositiveMove = 0 if(self.pos[1]>=self.yEndLim-self.size2x) else self.speed
 
         self.pos[0] += random.uniform(xNegativeMove, xPositiveMove)# % self.xEndLim
-        # self.pos[0] = x if (x>(self.xMidLim+self.size)) else (self.xEndLim-(self.xMidLim+self.size-x))
         self.pos[1] +=  random.uniform(yNegativeMove, yPositiveMove)# % (self.yEndLim-self.size)
 
     '''
@@ -148,7 +156,7 @@ class Person():
         reset counter for how long person has lived in this palce
     '''
     def changePlaces(self, xstart, xlim, ylim):
-        # self.pos = [int(random.uniform(xstart+self.size2x, xlim-self.size2x)), int(random.uniform(self.size2x, ylim-self.size2x))]
+        self.pos = [int(random.uniform(xstart+self.size2x, xlim-self.size2x)), int(random.uniform(self.size2x, ylim-self.size2x))]
         self.place = 1 if self.place==0 else 0      # change state to home/hospital
         self.daysInPlace = 0                        # reset how long has been spent here
 
@@ -167,6 +175,11 @@ class Person():
                     self.speed = self.speeds[2]     # home speed
                     self.changePlaces(self.xMidLim, self.xEndLim, self.yEndLim)
 
+    '''
+    Uses each person's x pos to determine where they actually are 
+    '''
+    def determinePosition(self):
+        self.actualPos = 1 if self.xMidLim<=self.pos[0]<self.xEndLim else 0
     '''
     Checks if this person should be hospitalised using rules
     '''
