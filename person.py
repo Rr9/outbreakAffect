@@ -199,7 +199,7 @@ class Person():
         if self.place==1 and self.homekit:          # if at home
             if self.inf>3 or self.daysInPlace>self.homeOutFreq:   # if they need to go outside || cured
                 self.speed = self.speeds[0]         # outside speed
-                self.changePlaces(0, self.xEndLim, self.yEndLim)    # go back outside
+                self.changePlaces(0, self.xMidLim, self.yEndLim)    # go back outside
 
     def shouldDischarge(self):
         if self.place==1 and (not self.homekit):    # if in hospital
@@ -217,7 +217,7 @@ class Person():
         if self.place==1 and (not self.homekit):    # if in hospital
             if self.inf>3:                          # if recovered
                 self.speed = self.speeds[0]         # outside speed
-                self.changePlaces(0, self.xEndLim, self.yEndLim)    # go back outside
+                self.changePlaces(0, self.xMidLim, self.yEndLim)    # go back outside
 
     # def getPos(self):
     #     return self.pos, self.inf

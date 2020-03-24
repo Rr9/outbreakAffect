@@ -105,7 +105,7 @@ def stepScene():
     # Collisons/coughs with infected people
     for inf in infected:
         for good in notinfected:
-            if inf.distance(good)<inf.radius and inf.place==0:
+            if inf.distance(good)<inf.radius:# and inf.place==0:
                 good.contract()
 
     return scatter
@@ -123,8 +123,8 @@ for i in range(NUMPERSONS):
     infection = 1 if random.random() < INFECTED_START else 0
     allpersons.append(Person(infection, XAXIS, YAXIS, divider=DIVIDERLOC, homekit=HOMEKIT, size=DOTSIZE, baseRadius=INFECTIONRAD))
 
+sns.set_style("dark")
 # fig, (ax1, ax2) = plt.subplots(2)
-sns.set_style("white")
 fig, ax1 = plt.subplots()
 
 ax1.set_xlim(0, XAXIS)  # xlim=(0, XAXIS), ylim=(0, YAXIS)
