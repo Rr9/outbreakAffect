@@ -34,11 +34,11 @@ class Person():
         self.xMidLim = divider-deviderWidth
         self.xEndLim = xlim
         self.yEndLim = ylim
-        self.pos = self.initialPosition(self.xMidLim, ylim)  # [x,y]
         self.place = 0          #0 outside, 1 insde
         self.daysInPlace = 0    #how many days this person has spent in this palace
         self.size = size+5
-        self.spreadRadius = [baseRadius, baseRadius+20]
+        self.size2x = self.size*2
+        self.spreadRadius = [baseRadius, baseRadius, baseRadius+20]
 
         self.homekit = homekit  # if this is false there is a hospital
         self.hospital = not homekit
@@ -47,13 +47,15 @@ class Person():
         # this is here to model healthcare workers that wear ppe (if we want later)
         self.infectionProb = infectionProbOverride if infectionProbOverride != 0 else self.infectionProb
 
+        self.pos = self.initialPosition(self.xMidLim, ylim)  # [x,y]
+
     '''
     Create starting point for this person
         within x=(0, xEndLim) Y=(0, yEndLim)
         everyone starts off outside
     '''
     def initialPosition(self, xEndLim, yEndLim):
-        return [int(random.uniform(0, xEndLim)), int(random.uniform(0, yEndLim))]
+        return [int(random.uniform(self.size2x, xEndLim-self.size2x)), int(random.uniform(self.size2x, yEndLim-self.size2x))]
 
     '''
     Contracts disease 
@@ -75,11 +77,11 @@ class Person():
                 self.inf += 1
 
             if 1<=self.inf<3:
-                self.radius=self.spreadRadius[0]
+                self.radius=self.spreadRadius[1]
             elif self.inf==3:
-                self.radius==self.spreadRadius[1]
+                self.radius==self.spreadRadius[2]
             else:
-                self.radius==0
+                self.radius==self.spreadRadius[0]
 
     '''
     timesep each person 
@@ -117,8 +119,12 @@ class Person():
         Warp around 
     '''
     def moveOutside(self):
-        self.pos[0] = (self.pos[0] + random.uniform(-1*self.speed, self.speed)) % (self.xMidLim-self.midlinewidth)
-        self.pos[1] = (self.pos[1] + random.uniform(-1*self.speed, self.speed)) % self.yEndLim
+        xNegativeMove = 0 if(self.pos[0]<=self.size2x) else -self.speed
+        xPositiveMove = 0 if(self.pos[0]>=self.xMidLim-self.midlinewidth-self.size2x) else self.speed
+        yNegativeMove = 0 if(self.pos[1]<=self.size2x) else -self.speed
+        yPositiveMove = 0 if(self.pos[1]>=self.yEndLim-self.size2x) else self.speed
+        self.pos[0] += random.uniform(xNegativeMove, xPositiveMove)# % (self.xMidLim-self.midlinewidth-self.size)
+        self.pos[1] += random.uniform(yNegativeMove, yPositiveMove)# % (self.yEndLim-self.size)
 
     '''
     Rules on how to move Inside 
@@ -127,9 +133,14 @@ class Person():
         Warp around between the 2 x walls and y edges
     '''
     def moveInside(self):
-        x = (self.pos[0] + random.uniform(-1*self.speed, self.speed)) % self.xEndLim
-        self.pos[0] = x if (x>(self.xMidLim+self.size)) else (self.xEndLim-(self.xMidLim+self.size-x))
-        self.pos[1] = (self.pos[1] + random.uniform(-1*self.speed, self.speed)) % self.yEndLim
+        xNegativeMove = 0 if(self.pos[0]<=self.xMidLim+self.midlinewidth+self.size2x) else -self.speed
+        xPositiveMove = 0 if(self.pos[0]>=self.xEndLim-self.size2x) else self.speed
+        yNegativeMove = 0 if(self.pos[1]<=self.size2x) else -self.speed
+        yPositiveMove = 0 if(self.pos[1]>=self.yEndLim-self.size2x) else self.speed
+
+        self.pos[0] += random.uniform(xNegativeMove, xPositiveMove)# % self.xEndLim
+        # self.pos[0] = x if (x>(self.xMidLim+self.size)) else (self.xEndLim-(self.xMidLim+self.size-x))
+        self.pos[1] +=  random.uniform(yNegativeMove, yPositiveMove)# % (self.yEndLim-self.size)
 
     '''
     Goes from outside -> inside, inside -> outisde
@@ -137,7 +148,7 @@ class Person():
         reset counter for how long person has lived in this palce
     '''
     def changePlaces(self, xstart, xlim, ylim):
-        self.pos = [int(random.uniform(xstart, xlim)), int(random.uniform(0, ylim))]
+        self.pos = [int(random.uniform(xstart+self.size2x, xlim-self.size2x)), int(random.uniform(self.size2x, ylim-self.size2x))]
         self.place = 1 if self.place==0 else 0      # change state to home/hospital
         self.daysInPlace = 0                        # reset how long has been spent here
 

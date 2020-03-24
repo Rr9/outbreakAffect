@@ -1,6 +1,6 @@
-import matplotlib
 import random
 
+import matplotlib
 import seaborn as sns
 
 matplotlib.use( 'tkagg' )
@@ -155,7 +155,7 @@ sns.despine(left=True, bottom=True)
 
 
 
-ani = animation.FuncAnimation(fig, anim,  interval=100, frames=10, blit=False)
+ani = animation.FuncAnimation(fig, anim,  interval=50, frames=10, blit=False)
 plt.show()
 
 
