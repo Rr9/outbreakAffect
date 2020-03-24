@@ -16,12 +16,12 @@ class Person():
 
     # mutation coeffs
     undiagDays = 1 * day
-    asymDays = 10 * day
+    asymDays = 2 * day
     symDays = 20 * day
     # list to make life easier to do calculations in mutate()
     mutations = [0, undiagDays, undiagDays + asymDays, undiagDays + asymDays + symDays, math.inf]
     colors = ['g', 'gold', 'tab:orange', 'r', 'b']
-    speeds = [30, 10, 5]      #[outside, hospital, home] movement speeds
+    speeds = [30, 25, 5]      #[outside, hospital, home] movement speeds
 
     midlinewidth = 15
 
@@ -119,12 +119,12 @@ class Person():
         Warp around 
     '''
     def moveOutside(self):
-        xNegativeMove = 0 if(self.pos[0]<=self.size2x) else -self.speed
-        xPositiveMove = 0 if(self.pos[0]>=self.xMidLim-self.midlinewidth-self.size2x) else self.speed
-        yNegativeMove = 0 if(self.pos[1]<=self.size2x) else -self.speed
-        yPositiveMove = 0 if(self.pos[1]>=self.yEndLim-self.size2x) else self.speed
-        self.pos[0] += random.uniform(xNegativeMove, xPositiveMove)# % (self.xMidLim-self.midlinewidth-self.size)
-        self.pos[1] += random.uniform(yNegativeMove, yPositiveMove)# % (self.yEndLim-self.size)
+        xNegativeMove = 0 if(self.pos[0]<=self.size2x) else -self.speed                 # dont move left if at x0
+        xPositiveMove = 0 if(self.pos[0]>=self.xMidLim-self.midlinewidth-self.size2x) else self.speed   # dont move right if at middle border
+        yNegativeMove = 0 if(self.pos[1]<=self.size2x) else -self.speed                 # dont move up if at y0
+        yPositiveMove = 0 if(self.pos[1]>=self.yEndLim-self.size2x) else self.speed     # dont move down if at yMax
+        self.pos[0] += random.uniform(xNegativeMove, xPositiveMove)                     # % (self.xMidLim-self.midlinewidth-self.size)
+        self.pos[1] += random.uniform(yNegativeMove, yPositiveMove)                     # % (self.yEndLim-self.size)
 
     '''
     Rules on how to move Inside 
@@ -148,7 +148,7 @@ class Person():
         reset counter for how long person has lived in this palce
     '''
     def changePlaces(self, xstart, xlim, ylim):
-        self.pos = [int(random.uniform(xstart+self.size2x, xlim-self.size2x)), int(random.uniform(self.size2x, ylim-self.size2x))]
+        # self.pos = [int(random.uniform(xstart+self.size2x, xlim-self.size2x)), int(random.uniform(self.size2x, ylim-self.size2x))]
         self.place = 1 if self.place==0 else 0      # change state to home/hospital
         self.daysInPlace = 0                        # reset how long has been spent here
 

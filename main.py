@@ -22,9 +22,9 @@ LEFTMIDDLE = DIVIDERLOC//2
 RIGHTMIDDLE = DIVIDERLOC+(XAXIS-DIVIDERLOC)//2
 
 DOTSIZE = 20
-COLORS = ['g', 'gold', 'tab:orange', 'r', 'purple', 'k']
+COLORS = ['g', 'gold', 'tab:orange', 'r', 'blue', 'k']
 INFECTIONRAD = DOTSIZE  #
-HOMEKIT = True
+HOMEKIT = False
 
 allpersons = []
 # positions = []
