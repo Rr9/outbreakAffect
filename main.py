@@ -124,6 +124,7 @@ for i in range(NUMPERSONS):
     allpersons.append(Person(infection, XAXIS, YAXIS, divider=DIVIDERLOC, homekit=HOMEKIT, size=DOTSIZE, baseRadius=INFECTIONRAD))
 
 # fig, (ax1, ax2) = plt.subplots(2)
+sns.set_style("white")
 fig, ax1 = plt.subplots()
 
 ax1.set_xlim(0, XAXIS)  # xlim=(0, XAXIS), ylim=(0, YAXIS)
@@ -150,6 +151,7 @@ deadText = ax1.text(XAXIS//2+400, -200, "0", horizontalalignment='center', fontd
 
 sns.set()
 scatter = ax1.scatter([],[], s=DOTSIZE)
+sns.despine(left=True, bottom=True)
 
 
 
