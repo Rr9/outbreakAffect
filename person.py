@@ -17,7 +17,7 @@ class Person():
 
     # mutation coeffs
     undiagDays = 1 * day
-    asymDays = 3 * day
+    asymDays = 10 * day
     symDays = 10 * day
     # list to make life easier to do calculations in mutate()
     mutations = [0, undiagDays, undiagDays + asymDays, undiagDays + asymDays + symDays, math.inf, math.inf]
