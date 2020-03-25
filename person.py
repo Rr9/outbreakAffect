@@ -3,25 +3,26 @@ import random
 
 '''
 Notes
-0-Uninfected, 1-Undiagnosable, 2-Asymptomatic, 3-Symptomatic 4-Recovered
+0-Uninfected, 1-Undiagnosable, 2-Asymptomatic, 3-Symptomatic 4-Recovered, 5-Dead
 !!! Be careful when adding new states !!!
 '''
 
 
 class Person():
-    day = 20                # cycles for one day
+    day = 7                # cycles for one day
     # infectionRad = 1      #
-    infectionProb = 1      # probability of getting infected upon contact
+    infectionProb = 0.5      # probability of getting infected upon contact
+    deathProb=0.25
     homeOutFreq = 7 * day   # infected people leave home every n days
 
     # mutation coeffs
     undiagDays = 1 * day
-    asymDays = 2 * day
-    symDays = 20 * day
+    asymDays = 3 * day
+    symDays = 10 * day
     # list to make life easier to do calculations in mutate()
-    mutations = [0, undiagDays, undiagDays + asymDays, undiagDays + asymDays + symDays, math.inf]
-    colors = ['g', 'gold', 'tab:orange', 'r', 'b']
-    speeds = [35, 25, 30]      #[outside, hospital, home] movement speeds
+    mutations = [0, undiagDays, undiagDays + asymDays, undiagDays + asymDays + symDays, math.inf, math.inf]
+    colors = ['g', 'gold', 'tab:orange', 'r', 'b', 'k']
+    speeds = [35, 15, 5, 0]      #[outside, hospital, home, dead] movement speeds
 
     midlinewidth = 15
 
@@ -87,7 +88,16 @@ class Person():
             # if age(days) >= amount of days it takes to move to the next state
             # move up in state
             if self.diseaseAge >= self.mutations[self.inf]:
-                self.inf += 1
+                if self.inf < 3:                # not symptomatic
+                    self.inf += 1               # just add 1
+                elif self.inf == 3:             # if symptomatic
+                    if self.place==0:           # if outisde
+                        self.inf += 2 if random.random()<self.deathProb else 1  # possibly die
+                        if self.inf==5:
+                            self.speed = self.speeds[3]
+                    else:                       # if at home/hospital
+                        self.inf += 1           # recover
+                        # self.speed = self.speed
 
 
     '''

@@ -24,7 +24,7 @@ RIGHTMIDDLE = DIVIDERLOC+(XAXIS-DIVIDERLOC)//2
 DOTSIZE = 20
 COLORS = ['g', 'gold', 'tab:orange', 'r', 'blue', 'k']
 INFECTIONRAD = DOTSIZE  #
-HOMEKIT = True
+HOMEKIT = False
 
 allpersons = []
 # positions = []
@@ -53,6 +53,7 @@ Big boi step function that updates the chart
 def stepScene():
     outsideCount=0
     insideCount=0
+    deadCount=0
 
     positions = []
     colors = []
@@ -81,15 +82,15 @@ def stepScene():
 
         positions.append(person.pos)        # set their postion for chart
         if infection<4:                     # if not cured
-            # if person.place == 0:           # if outside
-            if person.inf==0:           # if !infected/healthy
+            # if person.place == 0:         # if outside
+            if person.inf==0:               # if !infected/healthy
                 notinfected.append(person)
-            else:                       # if any stage of infection & person is outside
+            else:                           # if any stage of infection & person is outside
                 infected.append(person)     # this is to prevent people from infecting across hospital border
         elif infection == 4:
             recovered.append(person)
-        # else:                               #infection 5 - dead
-        #     dead.append(person)
+        elif infection == 5:                 #infection 5 - dead
+            deadCount+=1
 
     # Update charts
     scatter.set_color(colors)               # add color list to chart
@@ -99,6 +100,7 @@ def stepScene():
     noninfText.set_text(str(len(notinfected)))
     infectedText.set_text(str(len(infected)))
     curedText.set_text(str(len(recovered)))
+    deadText.set_text(deadCount)
     # TODO take len(uninfected), len(infected), len(recovered), len(dead)
     # TODO make graph from ^^^
 
@@ -155,7 +157,7 @@ sns.despine(left=True, bottom=True)
 
 
 
-ani = animation.FuncAnimation(fig, anim,  interval=50, frames=10, blit=False)
+ani = animation.FuncAnimation(fig, anim,  interval=20, frames=10, blit=False)
 plt.show()
 
 
