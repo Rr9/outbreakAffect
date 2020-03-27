@@ -27,7 +27,7 @@ class Person():
 
     midlinewidth = 15
 
-    def __init__(self, infectionState, xlim, ylim, divider, homekit=False, infectionProbOverride=0, deviderWidth=5, size=20, baseRadius=20):
+    def __init__(self, infectionState, xlim, ylim, divider, homekit=False, deviderWidth=5, size=20, baseRadius=20): #infectionProbOverride=0
         self.inf = infectionState
         # 0-Uninfected, 1-Undiagnosable, 2-Asymptomatic, 3-Symptomatic 4-Recovered
         self.age = 0            # days this person has lived for
@@ -48,10 +48,18 @@ class Person():
         self.speed = self.speeds[0]
 
         # this is here to model healthcare workers that wear ppe (if we want later)
-        self.infectionProb = infectionProbOverride if infectionProbOverride != 0 else self.infectionProb
+        # self.infectionProb = infectionProbOverride if infectionProbOverride != 0 else self.infectionProb
 
         self.pos = self.initialPosition(self.xMidLim, ylim)  # [x,y]
         self.actualPos = self.determinePosition()
+
+    def setExtraParams(self, infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False):
+        # Set param =  (internal value) if (not provided) else (provided value)
+        self.infectionProb = self.infectionProb if (not infectionProb) else infectionProb
+        self.day = self.day if (not day) else day
+        self.undiagDays = self.undiagDays if (not undiagDays) else undiagDays
+        self.asymDays = self.asymDays if (not asymDays) else asymDays
+        self.symDays = self.symDays if (not symDays) else symDays
 
     '''
     Create starting point for this person

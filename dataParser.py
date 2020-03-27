@@ -1,4 +1,6 @@
 import requests
+
+
 # import json
 
 def getData(country):
@@ -9,9 +11,8 @@ def getData(country):
         return response.status_code
 
 
-def writeData(jsonData, country):
+def writeDataMat(jsonData, country):
     country = country.title()
-    print(canada["timeline"]["cases"])
     filename = "fitVirusCV19_v05\ourData\getData" + country + ".m"
     with open(filename, "w") as dataFile:
         dataFile.write("function [country, C,date0] = getData"+country+"()\n")
@@ -25,7 +26,18 @@ def writeData(jsonData, country):
 
         dataFile.write("]';\nend")
 
+
+def writeData(jsonData, country):
+    counr = country.title()
+    filename = "results\JH" + counr + ".txt"
+    with open(filename, "w") as dataFile:
+        # dataFile.write("[")
+        for i, val in enumerate(jsonData):
+            dataFile.write(str(jsonData[val]) + ", ")
+        # dataFile.seek(dataFile.tell()-3,os.SEEK_CUR)
+        # dataFile.write("]")
+
 country = "canada"
 canada = getData(country=country)
 writeData(canada['timeline']['cases'], country)
-# print(canada['timeline']['cases'][0])
+# print(canada['timeline']['cases'])

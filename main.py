@@ -13,11 +13,12 @@ import time
 from person import Person
 from hospital import Hospital
 
+FILEWRITER = 0
 
 NUMPERSONS = 1000
 INFECTED_START = 0.03
 XAXIS = 6000
-YAXIS = 40000
+YAXIS = 4000
 DIVIDERWIDTH = 4
 DIVIDERRATIO = 3/4
 DIVIDERLOC = XAXIS*DIVIDERRATIO+(DIVIDERWIDTH/2)
@@ -55,7 +56,7 @@ def stepAll():
 '''
 Big boi step function that updates the chart
 '''
-def stepScene():
+def stepScene(headless=False):
     outsideCount=0
     insideCount=0
     deadCount=0
@@ -110,7 +111,8 @@ def stepScene():
     # TODO make graph from ^^^
 
     if WRITE:   #write to csv
-        fwriter.writerow({'uninfected':len(notinfected), 'infected':len(infected), 'cured':len(recovered), 'dead':deadCount, 'capacity':hospital.capacity})
+        conf = len(infected)+len(recovered)+deadCount
+        FILEWRITER.writerow({'uninfected':len(notinfected), 'infected':len(infected), 'cured':len(recovered), 'dead':deadCount, 'capacity':hospital.capacity, 'confirmed':conf})
         # {'emp_name': 'John Smith', 'dept': 'Accounting', 'birth_month': 'November'}
 
     # Collisons/coughs with infected people
@@ -119,7 +121,9 @@ def stepScene():
             if inf.distance(good)<inf.radius:# and inf.place==0:
                 good.contract()
 
-    #return scatter
+    if headless:
+        return len(infected)+len(recovered)+deadCount
+
 
 '''
 Animate function use by matplotlib
@@ -127,6 +131,31 @@ Animate function use by matplotlib
 def anim(i):
     stepAll()
     stepScene()
+
+def spawn(numPersons, infectedStart, infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False):
+    # Spawn everyone
+    infCount = 0
+    for i in range(numPersons):
+        infection = 1 if random.random() < infectedStart else 0
+        newp = Person(infection, XAXIS, YAXIS, divider=DIVIDERLOC, homekit=HOMEKIT, size=DOTSIZE, baseRadius=INFECTIONRAD)
+        newp.setExtraParams(infectionProb, day, undiagDays, asymDays, symDays)
+        allpersons.append(newp)
+        infCount+=infection
+    return infCount
+
+def run(iters=26, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False):
+    SHOW=False
+    WRITE=False
+    hospital.setCapacity(hosp)
+    initInfection = spawn(numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays)
+
+    cumulativeList = [initInfection,]
+
+    for i in range(iters):
+        stepAll()
+        cumulativeList.append(stepScene(headless=True))
+
+    return cumulativeList
 
 
 if SHOW:
@@ -160,35 +189,30 @@ if SHOW:
     scatter = ax1.scatter([],[], s=DOTSIZE)
     sns.despine(left=True, bottom=True)
 
-
-
-# Spawn everyone
-for i in range(NUMPERSONS):
-    infection = 1 if random.random() < INFECTED_START else 0
-    allpersons.append(Person(infection, XAXIS, YAXIS, divider=DIVIDERLOC, homekit=HOMEKIT, size=DOTSIZE, baseRadius=INFECTIONRAD))
-
 if WRITE:       # write || Write&Show
     folder = "results/"
     simType = 'HOME_' if HOMEKIT else 'HOSPITAL_'
     resutsFileName = folder+simType + str(NUMPERSONS)+"_"+str(INFECTED_START)+"_"+str(int(time.time())//2)+'.csv'
-    with open(resutsFileName, mode='w', newline='') as rfile:
-        fieldnames = ['uninfected', 'infected', 'cured', 'dead', 'capacity']
-        fwriter = csv.DictWriter(rfile, delimiter=',', fieldnames=fieldnames)
-        fwriter.writeheader()
+    rfile = open(resutsFileName, mode='w', newline='')
+    fieldnames = ['uninfected', 'infected', 'cured', 'dead', 'capacity', 'confirmed']
+    fwriter = csv.DictWriter(rfile, delimiter=',', fieldnames=fieldnames)
+    FILEWRITER = fwriter
+    fwriter.writeheader()
 
-        if SHOW:
-            print("show & write")
-            ani = animation.FuncAnimation(fig, anim,  interval=10, frames=1, blit=False)
-            plt.show()
-        elif WRITE:
-            print("!show & write")
-            while len(recovered)<1 or len(infected)>0:
-                anim(0)
-elif SHOW:      # show only
-    print("show & !write")
-    ani = animation.FuncAnimation(fig, anim, interval=10, frames=1, blit=False)
-    plt.show()
+def main():
+    spawn(numPersons=NUMPERSONS, infectedStart=INFECTED_START)
+    print(("SHOW " if SHOW else "") + (" WRITE" if WRITE else ""))
+    if SHOW: #Write&|Show
+        ani = animation.FuncAnimation(fig, anim,  interval=10, frames=1, blit=False)
+        plt.show()
+    elif WRITE:
+        while len(recovered)<1 or len(infected)>0:
+            anim(0)
+    if WRITE:
+        rfile.close()
 
+if __name__ == "__main__":
+    main()
 
 # next meeting
 ## hospital capacity - people die for lack of resources
