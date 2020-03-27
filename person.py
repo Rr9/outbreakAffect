@@ -9,15 +9,16 @@ Notes
 
 
 class Person():
-    day = 7                # cycles for one day
-    # infectionRad = 1      #
-    infectionProb = 0.5      # probability of getting infected upon contact
+    day = 7                 # cycles for one day
+    # infectionRad = 1      # now an array inside __INIT__()
+    infectionProb = 0.2     # probability of getting infected upon contact
     deathProb=0.25
     homeOutFreq = 7 * day   # infected people leave home every n days
+    homekitFalseNeg = 0.25  # percentage of home kit diagnosis that are false negatives
 
     # mutation coeffs
-    undiagDays = 1 * day
-    asymDays = 10 * day
+    undiagDays = 2 * day
+    asymDays = 15 * day
     symDays = 10 * day
     # list to make life easier to do calculations in mutate()
     mutations = [0, undiagDays, undiagDays + asymDays, undiagDays + asymDays + symDays, math.inf, math.inf]
@@ -36,8 +37,8 @@ class Person():
         self.xMidLim = divider-deviderWidth
         self.xEndLim = xlim
         self.yEndLim = ylim
-        self.place = 0          #0 outside, 1 insde
-        self.daysInPlace = 0    #how many days this person has spent in this palace
+        self.place = 0          # 0 outside, 1 insde
+        self.daysInPlace = 0    # how many days this person has spent in this palace
         self.size = size+5
         self.size2x = self.size*2
         self.spreadRadius = [baseRadius, baseRadius, baseRadius+20]
@@ -75,28 +76,29 @@ class Person():
     def mutate(self):
         if self.inf > 0:  # if you are infected
             self.diseaseAge += 1
-            if self.inf<3:                          # if not symptomatic
+            if self.inf<3:                            # if not symptomatic
                 # self.diseaseAge+=1                  # disease age automatically goes up by 1
-                self.radius=self.spreadRadius[1]
-            elif self.inf==3:                       # if you are symptomatic
-                self.radius==self.spreadRadius[2]
+                self.radius = self.spreadRadius[1]
+            elif self.inf == 3:                       # if you are symptomatic
+                self.radius == self.spreadRadius[2]
                 # if self.actualPos==1:               # only heal if youre at home or hopsital
                 #     self.diseaseAge += 1
             else:
-                self.radius==self.spreadRadius[0]
+                self.radius == self.spreadRadius[0]
 
             # if age(days) >= amount of days it takes to move to the next state
             # move up in state
             if self.diseaseAge >= self.mutations[self.inf]:
-                if self.inf < 3:                # not symptomatic
-                    self.inf += 1               # just add 1
-                elif self.inf == 3:             # if symptomatic
-                    if self.place==0:           # if outisde
+                if self.inf < 3:                            # not symptomatic
+                    self.inf += 1                           #   become symptomatic
+                elif self.inf == 3:                         # if symptomatic
+                    if self.place==0 & self.daysInPlace>1:  #   if outisde for more than 1 day
+                                                            #   (this is so no one going out for groceries die)
                         self.inf += 2 if random.random()<self.deathProb else 1  # possibly die
                         if self.inf==5:
                             self.speed = self.speeds[3]
                     else:                       # if at home/hospital
-                        self.inf += 1           # recover
+                        self.inf += 1           #   recover
                         # self.speed = self.speed
 
 
@@ -158,7 +160,7 @@ class Person():
         yPositiveMove = 0 if(self.pos[1]>=self.yEndLim-self.size2x) else self.speed
 
         self.pos[0] += random.uniform(xNegativeMove, xPositiveMove)# % self.xEndLim
-        self.pos[1] +=  random.uniform(yNegativeMove, yPositiveMove)# % (self.yEndLim-self.size)
+        self.pos[1] += random.uniform(yNegativeMove, yPositiveMove)# % (self.yEndLim-self.size)
 
     '''
     Goes from outside -> inside, inside -> outisde
@@ -182,8 +184,9 @@ class Person():
         if self.homekit:                    # if this is sim with kits at home
             if self.age % self.day == 0:    # check yourself at the end of every day
                 if 4> self.inf >1:          # if disease is diagnosable
-                    self.speed = self.speeds[2]     # home speed
-                    self.changePlaces(self.xMidLim, self.xEndLim, self.yEndLim)
+                    if random.random() > self.homekitFalseNeg:
+                        self.speed = self.speeds[2]     # home speed
+                        self.changePlaces(self.xMidLim, self.xEndLim, self.yEndLim)
 
     '''
     Uses each person's x pos to determine where they actually are 
