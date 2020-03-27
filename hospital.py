@@ -18,3 +18,6 @@ class Hospital():
     def release(self):
         self.occupants-=1
         # print("-\t"+str(self.occupants))
+
+    def setCapacity(self, cap=False):
+        self.capacity = self.capacity if cap==False else cap
