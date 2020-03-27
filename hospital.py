@@ -1,6 +1,6 @@
 class Hospital():
 
-    capacity = 50
+    capacity = 500
 
     def __init__(self, xStartLim, xEndLim, yStartLim=0, yEndLim=2000):
         self.xStartLim = xStartLim
