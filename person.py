@@ -100,7 +100,7 @@ class Person():
                 if self.inf < 3:                            # not symptomatic
                     self.inf += 1                           #   become symptomatic
                 elif self.inf == 3:                         # if symptomatic
-                    if self.place==0 & self.daysInPlace>1:  #   if outisde for more than 1 day
+                    if self.place==0 and self.daysInPlace>1:  #   if outisde for more than 1 day
                                                             #   (this is so no one going out for groceries die)
                         self.inf += 2 if random.random()<self.deathProb else 1  # possibly die
                         if self.inf==5:
