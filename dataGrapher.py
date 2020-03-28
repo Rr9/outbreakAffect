@@ -16,6 +16,10 @@ with open(filename) as csvDataFile:
         infected.append(int(row[1]))
         cured.append(int(row[2]))
         dead.append(int(row[3]))
+        try:
+            [next(reader) for _ in range(0,7)]
+        except StopIteration:
+            pass
 
 
 plt.ion() # Makes it interactive. Allows for dynamic plotting
