@@ -157,6 +157,14 @@ def run(iters=26, numPersons=1000, infectedStart=0.03,  infectionProb=False, day
 
     return cumulativeList
 
+def oneDDistance(p1,q1):
+    return (p1-q1)**2
+
+def compare(realData, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False):
+    iters = len(realData)
+    generate = run(iters, numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays, hosp)
+    diffs = [oneDDistance(generate[i]/numPersons,realData[i]) for i in range(iters)]
+    return sum(diffs)**(1/2)
 
 if SHOW:
     sns.set_style("dark")

@@ -1,3 +1,5 @@
+import re
+
 import requests
 
 
@@ -29,15 +31,15 @@ def writeDataMat(jsonData, country):
 
 def writeData(jsonData, country):
     counr = country.title()
-    filename = "results\JH" + counr + ".txt"
+    filename = "results\JH" + re.sub('[^A-Za-z0-9]+', '', counr) + ".txt"
     with open(filename, "w") as dataFile:
         # dataFile.write("[")
         for i, val in enumerate(jsonData):
-            dataFile.write(str(jsonData[val]) + ", ")
+            dataFile.write(str(jsonData[val]/14570000) + ", ")
         # dataFile.seek(dataFile.tell()-3,os.SEEK_CUR)
         # dataFile.write("]")
 
-country = "canada"
+country = "canada/ontario"
 canada = getData(country=country)
 writeData(canada['timeline']['cases'], country)
 # print(canada['timeline']['cases'])
