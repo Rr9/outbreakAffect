@@ -151,7 +151,7 @@ def run(iters=26, numPersons=1000, infectedStart=0.03,  infectionProb=False, day
 
     cumulativeList = [initInfection,]
 
-    for i in range(iters):
+    for i in range(iters-1):
         stepAll()
         cumulativeList.append(stepScene(headless=True))
 
@@ -160,11 +160,19 @@ def run(iters=26, numPersons=1000, infectedStart=0.03,  infectionProb=False, day
 def oneDDistance(p1,q1):
     return (p1-q1)**2
 
-def compare(realData, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False):
+def compare(realData, generatedData, persons=False):
+    assert(len(realData) == len(generatedData))
+    iters = len(realData)
+    if persons:
+        diffs = [oneDDistance(generatedData[i] , realData[i]*persons) for i in range(iters)]
+    else:
+        diffs = [oneDDistance(generatedData[i],realData[i]) for i in range(iters)]
+    return sum(diffs)**(1/2)
+
+def compareAuto(realData, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False):
     iters = len(realData)
     generate = run(iters, numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays, hosp)
-    diffs = [oneDDistance(generate[i]/numPersons,realData[i]) for i in range(iters)]
-    return sum(diffs)**(1/2)
+    return generate,  compare(realData=realData, generatedData=generate, persons=numPersons)
 
 if SHOW:
     sns.set_style("dark")

@@ -35,7 +35,7 @@ def writeData(jsonData, country):
     with open(filename, "w") as dataFile:
         # dataFile.write("[")
         for i, val in enumerate(jsonData):
-            dataFile.write(str(jsonData[val]/14570000) + ", ")
+            dataFile.write(str(jsonData[val]) + ", ")
         # dataFile.seek(dataFile.tell()-3,os.SEEK_CUR)
         # dataFile.write("]")
 
