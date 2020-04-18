@@ -27,7 +27,7 @@ class Person():
 
     midlinewidth = 15
 
-    def __init__(self, infectionState, xlim, ylim, divider, homekit=False, deviderWidth=5, size=20, baseRadius=20): #infectionProbOverride=0
+    def __init__(self, infectionState, xlim, ylim, divider, homekit=False, deviderWidth=5, size=20, baseRadius=20, baseMovement=speeds[0]): #infectionProbOverride=0
         self.inf = infectionState
         # 0-Uninfected, 1-Undiagnosable, 2-Asymptomatic, 3-Symptomatic 4-Recovered
         self.age = 0            # days this person has lived for
@@ -39,12 +39,13 @@ class Person():
         self.yEndLim = ylim
         self.place = 0          # 0 outside, 1 insde
         self.daysInPlace = 0    # how many days this person has spent in this palace
-        self.size = size+5
+        self.size = size*1.25
         self.size2x = self.size*2
-        self.spreadRadius = [baseRadius, baseRadius, baseRadius+20]
+        self.spreadRadius = [baseRadius, baseRadius, baseRadius*1.34]
 
         self.homekit = homekit  # if this is false there is a hospital
         self.hospital = not homekit
+        self.speeds = [baseMovement, baseMovement*.45, baseMovement*0.15, 0]
         self.speed = self.speeds[0]
 
         # this is here to model healthcare workers that wear ppe (if we want later)
@@ -200,7 +201,8 @@ class Person():
     Uses each person's x pos to determine where they actually are 
     '''
     def determinePosition(self):
-        self.actualPos = 1 if self.xMidLim<=self.pos[0]<self.xEndLim else 0
+        # self.actualPos = 1 if self.xMidLim<=self.pos[0]<self.xEndLim else 0
+        return 1 if self.xMidLim<=self.pos[0]<self.xEndLim else 0
     '''
     Checks if this person should be hospitalised using rules
     '''

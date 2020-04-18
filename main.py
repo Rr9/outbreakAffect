@@ -1,3 +1,4 @@
+import math
 import random
 
 import matplotlib
@@ -15,15 +16,24 @@ from hospital import Hospital
 
 FILEWRITER = 0
 
+POPDENSITY = 2  #KiloPX^2
 NUMPERSONS = 1000
+
+dimDensity = math.sqrt(NUMPERSONS/POPDENSITY)*1000
+
 INFECTED_START = 0.03
-XAXIS = 6000
-YAXIS = 4000
+DIVIDERRATIO = 4/5
+XAXIS = math.ceil(dimDensity/DIVIDERRATIO)
+YAXIS = dimDensity
+# XAXIS = 6000
+# YAXIS=4000
 DIVIDERWIDTH = 4
-DIVIDERRATIO = 3/4
 DIVIDERLOC = XAXIS*DIVIDERRATIO+(DIVIDERWIDTH/2)
 LEFTMIDDLE = DIVIDERLOC//2
 RIGHTMIDDLE = DIVIDERLOC+(XAXIS-DIVIDERLOC)//2
+
+# BASEMOVEMENTRATIO = 15
+# baseMovementSpeed = (dimDensity**2)/((4000*6000))*BASEMOVEMENTRATIO
 
 DOTSIZE = 20#XAXIS*YAXIS//(NUMPERSONS**2)#
 COLORS = ['g', 'gold', 'tab:orange', 'r', 'blue', 'k']
@@ -71,6 +81,8 @@ def stepScene(headless=False):
 
     # extract everyone's infection data and put People into lists
     for person in allpersons:
+        person.step()
+
         infection = person.inf              # get infectiron status
         colors.append(COLORS[infection])    # set their color for the chart
 
@@ -129,25 +141,25 @@ def stepScene(headless=False):
 Animate function use by matplotlib
 '''
 def anim(i):
-    stepAll()
+    # stepAll()
     stepScene()
 
-def spawn(numPersons, infectedStart, infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False):
+def spawn(numPersons, infectedStart, infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False):#, baseMovementSpeed=baseMovementSpeed):
     # Spawn everyone
     infCount = 0
     for i in range(numPersons):
         infection = 1 if random.random() < infectedStart else 0
-        newp = Person(infection, XAXIS, YAXIS, divider=DIVIDERLOC, homekit=HOMEKIT, size=DOTSIZE, baseRadius=INFECTIONRAD)
+        newp = Person(infection, XAXIS, YAXIS, divider=DIVIDERLOC, homekit=HOMEKIT, size=DOTSIZE, baseRadius=INFECTIONRAD)#, baseMovement=baseMovementSpeed)
         newp.setExtraParams(infectionProb, day, undiagDays, asymDays, symDays)
         allpersons.append(newp)
         infCount+=infection
     return infCount
 
-def run(iters=26, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False):
+def run(iters=26, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False):#, baseMovementSpeed=baseMovementSpeed):
     SHOW=False
     WRITE=False
     hospital.setCapacity(hosp)
-    initInfection = spawn(numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays)
+    initInfection = spawn(numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays, baseMovementSpeed=baseMovementSpeed)
 
     cumulativeList = [initInfection,]
 
@@ -181,8 +193,8 @@ if SHOW:
 
     ax1.set_xlim(0, XAXIS)  # xlim=(0, XAXIS), ylim=(0, YAXIS)
     ax1.set_ylim(0, YAXIS)
-    ax1.set_xticklabels([])
-    ax1.set_yticklabels([])
+    # ax1.set_xticklabels([])
+    # ax1.set_yticklabels([])
     ax1.axvline(DIVIDERLOC, linewidth=(DIVIDERWIDTH - 2), color='grey')
     ax1.text(LEFTMIDDLE, YAXIS+10, "Outside", fontsize=10, horizontalalignment='center')
     if HOMEKIT:
@@ -219,7 +231,7 @@ def main():
     spawn(numPersons=NUMPERSONS, infectedStart=INFECTED_START)
     print(("SHOW " if SHOW else "") + (" WRITE" if WRITE else ""))
     if SHOW: #Write&|Show
-        ani = animation.FuncAnimation(fig, anim,  interval=10, frames=1, blit=False)
+        ani = animation.FuncAnimation(fig, anim,  interval=1, frames=1, blit=False)
         plt.show()
     elif WRITE:
         while len(recovered)<1 or len(infected)>0:
@@ -248,3 +260,6 @@ if __name__ == "__main__":
 
 ## Experiaentla result
 ### Explain what we did and why
+
+
+## Find critucal population density point
