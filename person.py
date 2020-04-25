@@ -10,6 +10,7 @@ Notes
 
 class Person():
     day = 7                 # cycles for one day
+    standardDay = day
     # infectionRad = 1      # now an array inside __INIT__()
     infectionProb = 0.2     # probability of getting infected upon contact
     deathProb=0.25
@@ -53,14 +54,14 @@ class Person():
         self.pos = self.initialPosition(self.xMidLim, ylim)  # [x,y]
         self.actualPos = self.determinePosition()
 
-    def setExtraParams(self, infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, baseMovement=speeds[0]):
+    def setExtraParams(self, infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, baseMovement=False):
         # Set param =  (internal value) if (not provided) else (provided value)
         self.infectionProb = self.infectionProb if (not infectionProb) else infectionProb
         self.day = self.day if (not day) else day
-        self.undiagDays = self.undiagDays if (not undiagDays) else undiagDays
-        self.asymDays = self.asymDays if (not asymDays) else asymDays
-        self.symDays = self.symDays if (not symDays) else symDays
-        self.speeds[0] = self.speeds if (not baseMovement) else baseMovement
+        self.undiagDays = self.undiagDays/self.standardDay*day if (not undiagDays) else undiagDays
+        self.asymDays = self.asymDays/self.standardDay*day if (not asymDays) else asymDays
+        self.symDays = self.symDays/self.standardDay*day if (not symDays) else symDays
+        self.speeds[0] = self.speeds[0] if (not baseMovement) else baseMovement
         self.speeds = [self.speeds[0], self.speeds[0]*.45, self.speeds[0]*0.15, 0]
         self.speed = self.speeds[0]
 
