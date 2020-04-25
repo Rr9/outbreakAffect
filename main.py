@@ -159,7 +159,7 @@ def run(iters=26, numPersons=1000, infectedStart=0.03,  infectionProb=False, day
     SHOW=False
     WRITE=False
     hospital.setCapacity(hosp)
-    initInfection = spawn(numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays, baseMovementSpeed=baseMovementSpeed)
+    initInfection = spawn(numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays)#, baseMovementSpeed=baseMovementSpeed)
 
     cumulativeList = [initInfection,]
 
