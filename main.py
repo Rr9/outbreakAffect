@@ -144,22 +144,22 @@ def anim(i):
     # stepAll()
     stepScene()
 
-def spawn(numPersons, infectedStart, infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False):#, baseMovementSpeed=baseMovementSpeed):
+def spawn(numPersons, infectedStart, infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, baseMovementSpeed=False):
     # Spawn everyone
     infCount = 0
     for i in range(numPersons):
         infection = 1 if random.random() < infectedStart else 0
-        newp = Person(infection, XAXIS, YAXIS, divider=DIVIDERLOC, homekit=HOMEKIT, size=DOTSIZE, baseRadius=INFECTIONRAD)#, baseMovement=baseMovementSpeed)
-        newp.setExtraParams(infectionProb, day, undiagDays, asymDays, symDays)
+        newp = Person(infection, XAXIS, YAXIS, divider=DIVIDERLOC, homekit=HOMEKIT, size=DOTSIZE, baseRadius=INFECTIONRAD)
+        newp.setExtraParams(infectionProb, day, undiagDays, asymDays, symDays, baseMovement=baseMovementSpeed)
         allpersons.append(newp)
         infCount+=infection
     return infCount
 
-def run(iters=26, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False):#, baseMovementSpeed=baseMovementSpeed):
+def run(iters=26, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False, baseMovementSpeed=False):
     SHOW=False
     WRITE=False
     hospital.setCapacity(hosp)
-    initInfection = spawn(numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays)#, baseMovementSpeed=baseMovementSpeed)
+    initInfection = spawn(numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays, baseMovementSpeed=baseMovementSpeed)
 
     cumulativeList = [initInfection,]
 
@@ -181,9 +181,9 @@ def compare(realData, generatedData, persons=False):
         diffs = [oneDDistance(generatedData[i],realData[i]) for i in range(iters)]
     return sum(diffs)**(1/2)
 
-def compareAuto(realData, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False):
+def compareAuto(realData, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False, baseMovementSpeed=False):
     iters = len(realData)
-    generate = run(iters, numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays, hosp)
+    generate = run(iters, numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays, hosp, baseMovementSpeed=baseMovementSpeed)
     return generate,  compare(realData=realData, generatedData=generate, persons=numPersons)
 
 if SHOW:

@@ -27,7 +27,7 @@ class Person():
 
     midlinewidth = 15
 
-    def __init__(self, infectionState, xlim, ylim, divider, homekit=False, deviderWidth=5, size=20, baseRadius=20, baseMovement=speeds[0]): #infectionProbOverride=0
+    def __init__(self, infectionState, xlim, ylim, divider, homekit=False, deviderWidth=5, size=20, baseRadius=20): #infectionProbOverride=0
         self.inf = infectionState
         # 0-Uninfected, 1-Undiagnosable, 2-Asymptomatic, 3-Symptomatic 4-Recovered
         self.age = 0            # days this person has lived for
@@ -45,7 +45,6 @@ class Person():
 
         self.homekit = homekit  # if this is false there is a hospital
         self.hospital = not homekit
-        self.speeds = [baseMovement, baseMovement*.45, baseMovement*0.15, 0]
         self.speed = self.speeds[0]
 
         # this is here to model healthcare workers that wear ppe (if we want later)
@@ -54,13 +53,16 @@ class Person():
         self.pos = self.initialPosition(self.xMidLim, ylim)  # [x,y]
         self.actualPos = self.determinePosition()
 
-    def setExtraParams(self, infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False):
+    def setExtraParams(self, infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, baseMovement=speeds[0]):
         # Set param =  (internal value) if (not provided) else (provided value)
         self.infectionProb = self.infectionProb if (not infectionProb) else infectionProb
         self.day = self.day if (not day) else day
         self.undiagDays = self.undiagDays if (not undiagDays) else undiagDays
         self.asymDays = self.asymDays if (not asymDays) else asymDays
         self.symDays = self.symDays if (not symDays) else symDays
+        self.speeds[0] = self.speeds if (not baseMovement) else baseMovement
+        self.speeds = [self.speeds[0], self.speeds[0]*.45, self.speeds[0]*0.15, 0]
+        self.speed = self.speeds[0]
 
     '''
     Create starting point for this person
