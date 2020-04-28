@@ -32,12 +32,12 @@ DIVIDERLOC = XAXIS*DIVIDERRATIO+(DIVIDERWIDTH/2)
 LEFTMIDDLE = DIVIDERLOC//2
 RIGHTMIDDLE = DIVIDERLOC+(XAXIS-DIVIDERLOC)//2
 
-# BASEMOVEMENTRATIO = 15
-# baseMovementSpeed = (dimDensity**2)/((4000*6000))*BASEMOVEMENTRATIO
+BASEMOVEMENTRATIO = 5
+BASEMOVEMENTSPEED = (dimDensity**2)/((4000*6000))*BASEMOVEMENTRATIO
 
 DOTSIZE = 20#XAXIS*YAXIS//(NUMPERSONS**2)#
 COLORS = ['g', 'gold', 'tab:orange', 'r', 'blue', 'k']
-INFECTIONRAD = DOTSIZE  #
+INFECTIONRAD = 100  #
 HOMEKIT = False
 SHOW = True
 WRITE = False
@@ -55,6 +55,7 @@ hospital = Hospital(XAXIS//2+DIVIDERWIDTH, XAXIS)
 
 
 
+scatter, fig, outsideText, insideText, noninfText, infectedText, curedText, deadText = [None for i in range(8)]
 '''
 call everyone's step()
 '''
@@ -119,8 +120,6 @@ def stepScene(headless=False):
         infectedText.set_text(str(len(infected)))
         curedText.set_text(str(len(recovered)))
         deadText.set_text(deadCount)
-    # TODO take len(uninfected), len(infected), len(recovered), len(dead)
-    # TODO make graph from ^^^
 
     if WRITE:   #write to csv
         conf = len(infected)+len(recovered)+deadCount
@@ -156,16 +155,29 @@ def spawn(numPersons, infectedStart, infectionProb=False, day=False, undiagDays=
     return infCount
 
 def run(iters=26, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False, baseMovementSpeed=False):
-    SHOW=False
+    global SHOW; global WRITE;
+    SHOW= False
     WRITE=False
+
+    global scatter; global fig; global outsideText; global insideText; global noninfText; global infectedText; global curedText; global deadText; global FILEWRITER;
+    scatter, fig, outsideText, insideText, noninfText, infectedText, curedText, deadText = setupShow() if SHOW else [None for i in range(8)]
+    FILEWRITER, rfile = setupWrite() if WRITE else [None, None]
+
     hospital.setCapacity(hosp)
     initInfection = spawn(numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays, baseMovementSpeed=baseMovementSpeed)
 
     cumulativeList = [initInfection,]
 
     for i in range(iters-1):
-        stepAll()
+        # stepAll()
         cumulativeList.append(stepScene(headless=True))
+        if SHOW:
+            plt.pause(0.05)
+            plt.show()
+
+
+    if WRITE:
+        rfile.close()
 
     return cumulativeList
 
@@ -186,7 +198,7 @@ def compareAuto(realData, numPersons=1000, infectedStart=0.03,  infectionProb=Fa
     generate = run(iters, numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays, hosp, baseMovementSpeed=baseMovementSpeed)
     return generate,  compare(realData=realData, generatedData=generate, persons=numPersons)
 
-if SHOW:
+def setupShow():
     sns.set_style("dark")
     # fig, (ax1, ax2) = plt.subplots(2)
     fig, ax1 = plt.subplots()
@@ -216,8 +228,9 @@ if SHOW:
     sns.set()
     scatter = ax1.scatter([],[], s=DOTSIZE)
     sns.despine(left=True, bottom=True)
+    return scatter, fig, outsideText, insideText, noninfText, infectedText, curedText, deadText
 
-if WRITE:       # write || Write&Show
+def setupWrite():       # write || Write&Show
     folder = "results/"
     simType = 'HOME_' if HOMEKIT else 'HOSPITAL_'
     resutsFileName = folder+simType + str(NUMPERSONS)+"_"+str(INFECTED_START)+"_"+str(int(time.time())//2)+'.csv'
@@ -226,11 +239,17 @@ if WRITE:       # write || Write&Show
     fwriter = csv.DictWriter(rfile, delimiter=',', fieldnames=fieldnames)
     FILEWRITER = fwriter
     fwriter.writeheader()
+    return FILEWRITER, rfile
 
 def main():
-    spawn(numPersons=NUMPERSONS, infectedStart=INFECTED_START)
+    spawn(numPersons=NUMPERSONS, infectedStart=INFECTED_START, baseMovementSpeed=BASEMOVEMENTSPEED)
     print(("SHOW " if SHOW else "") + (" WRITE" if WRITE else ""))
-    if SHOW: #Write&|Show
+
+    global scatter; global fig; global outsideText; global insideText; global noninfText; global infectedText; global curedText; global deadText; global FILEWRITER;
+    scatter, fig, outsideText, insideText, noninfText, infectedText, curedText, deadText = setupShow() if SHOW else [None for i in range(8)]
+    FILEWRITER, rfile = setupWrite() if WRITE else [None, None]
+
+    if SHOW:  #Write&|Show
         ani = animation.FuncAnimation(fig, anim,  interval=1, frames=1, blit=False)
         plt.show()
     elif WRITE:
