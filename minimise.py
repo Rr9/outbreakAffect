@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.optimize
+import matplotlib.pyplot as plt
 
 from main import *
 
@@ -34,3 +35,8 @@ xopt = scipy.optimize.fmin(func=compareAutoPT, x0=[infectionStart, infectionProb
 # r= run(100)
 # print(distance[0])
 # print(distance[1])
+
+def multigraph(la, lb)
+    # plot two graphs to compare
+    plt.plot(len(la), la, 'r', len(lb), lb, 'b')
+    plt.show()
