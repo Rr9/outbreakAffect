@@ -1,23 +1,23 @@
+import csv
 import math
 import random
-
-import matplotlib
-import seaborn as sns
-
-matplotlib.use( 'tkagg' )
-import matplotlib.animation as animation
-import matplotlib.pyplot as plt
-
-import csv
 import time
 
-from person import Person
+import matplotlib
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
 from hospital import Hospital
+from person import Person
+
+matplotlib.use( 'tkagg' )
 
 FILEWRITER = 0
 
-POPDENSITY = 2  #KiloPX^2
-NUMPERSONS = 1000
+POPDENSITY = 3  #KiloPX^2
+NUMPERSONS = 3000
 
 dimDensity = math.sqrt(NUMPERSONS/POPDENSITY)*1000
 
@@ -40,7 +40,7 @@ COLORS = ['g', 'gold', 'tab:orange', 'r', 'blue', 'k']
 INFECTIONRAD = 100  #
 HOMEKIT = False
 SHOW = True
-WRITE = False
+WRITE = True
 
 allpersons = []
 # positions = []
@@ -143,18 +143,18 @@ def anim(i):
     # stepAll()
     stepScene()
 
-def spawn(numPersons, infectedStart, infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, baseMovementSpeed=False):
+def spawn(numPersons, infectedStart, infectionProb=False, baseRadius=INFECTIONRAD, day=False, undiagDays=False, asymDays=False, symDays=False, baseMovementSpeed=False):
     # Spawn everyone
     infCount = 0
     for i in range(numPersons):
         infection = 1 if random.random() < infectedStart else 0
-        newp = Person(infection, XAXIS, YAXIS, divider=DIVIDERLOC, homekit=HOMEKIT, size=DOTSIZE, baseRadius=INFECTIONRAD)
+        newp = Person(infection, XAXIS, YAXIS, divider=DIVIDERLOC, homekit=HOMEKIT, size=DOTSIZE, baseRadius=baseRadius)
         newp.setExtraParams(infectionProb, day, undiagDays, asymDays, symDays, baseMovement=baseMovementSpeed)
         allpersons.append(newp)
         infCount+=infection
     return infCount
 
-def run(iters=26, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False, baseMovementSpeed=False):
+def run(iters=26, numPersons=1000, infectedStart=0.03, infectionProb=False, baseRadius=INFECTIONRAD, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False, baseMovementSpeed=False):
     global SHOW; global WRITE;
     SHOW= False
     WRITE=False
@@ -164,21 +164,27 @@ def run(iters=26, numPersons=1000, infectedStart=0.03,  infectionProb=False, day
     FILEWRITER, rfile = setupWrite() if WRITE else [None, None]
 
     hospital.setCapacity(hosp)
-    initInfection = spawn(numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays, baseMovementSpeed=baseMovementSpeed)
+    initInfection = spawn(numPersons, infectedStart, infectionProb, baseRadius, day, undiagDays, asymDays, symDays, baseMovementSpeed=baseMovementSpeed)
 
-    cumulativeList = [initInfection,]
+    cumulativeList = [initInfection]
 
     for i in range(iters-1):
         # stepAll()
-        cumulativeList.append(stepScene(headless=True))
+        for j in range(day-1):
+            stepScene(headless=False)
+            # print("-", end="")
+        thisstep = stepScene(headless=True)
+        print(str(i) + ":" + str(thisstep), end=", ")
+        cumulativeList.append(thisstep)
         if SHOW:
             plt.pause(0.05)
             plt.show()
 
-
     if WRITE:
         rfile.close()
 
+    print()
+    allpersons.clear()
     return cumulativeList
 
 def oneDDistance(p1,q1):
@@ -193,9 +199,9 @@ def compare(realData, generatedData, persons=False):
         diffs = [oneDDistance(generatedData[i],realData[i]) for i in range(iters)]
     return sum(diffs)**(1/2)
 
-def compareAuto(realData, numPersons=1000, infectedStart=0.03,  infectionProb=False, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False, baseMovementSpeed=False):
+def compareAuto(realData, numPersons=1000, infectedStart=0.03, infectionProb=False, baseradius=INFECTIONRAD, day=False, undiagDays=False, asymDays=False, symDays=False, hosp=False, baseMovementSpeed=False):
     iters = len(realData)
-    generate = run(iters, numPersons, infectedStart, infectionProb, day, undiagDays, asymDays, symDays, hosp, baseMovementSpeed=baseMovementSpeed)
+    generate = run(iters, numPersons, infectedStart, infectionProb, baseradius, day, undiagDays, asymDays, symDays, hosp, baseMovementSpeed=baseMovementSpeed)
     return generate,  compare(realData=realData, generatedData=generate, persons=numPersons)
 
 def setupShow():
@@ -242,7 +248,27 @@ def setupWrite():       # write || Write&Show
     return FILEWRITER, rfile
 
 def main():
-    spawn(numPersons=NUMPERSONS, infectedStart=INFECTED_START, baseMovementSpeed=BASEMOVEMENTSPEED)
+    startpercentage = 0.0023562754370643774
+    POPDENSITY = 3  # KiloPX^2
+
+    numpersons = 3000
+
+    BASEMOVEMENTRATIO = 5.4
+    baseMovementSpeed = np.int((dimDensity ** 2) / (4000 * 6000) * BASEMOVEMENTRATIO)
+
+    infectionStart = np.float(startpercentage)
+    infectionProb = np.float(0.26)
+    baseRadius = 72
+
+    day = 12
+    undiagDays = np.uint8(7 * day)
+    asymDays = np.uint8(14 * day)
+    symDays = np.uint8(15 * day)
+    hosp = math.ceil(3.2 * (numpersons / 1000) * 1)
+
+    initInfection = spawn(NUMPERSONS, infectionStart, infectionProb, baseRadius, day, undiagDays, asymDays, symDays,
+                          baseMovementSpeed=baseMovementSpeed)
+    # spawn(numPersons=NUMPERSONS, infectedStart=INFECTED_START, baseMovementSpeed=BASEMOVEMENTSPEED)
     print(("SHOW " if SHOW else "") + (" WRITE" if WRITE else ""))
 
     global scatter; global fig; global outsideText; global insideText; global noninfText; global infectedText; global curedText; global deadText; global FILEWRITER;
