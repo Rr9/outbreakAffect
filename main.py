@@ -250,8 +250,9 @@ def setupWrite():       # write || Write&Show
 def main():
     startpercentage = 0.0023562754370643774
     POPDENSITY = 3  # KiloPX^2
-
     numpersons = 3000
+
+    dimDensity = math.sqrt(NUMPERSONS / POPDENSITY) * 1000
 
     BASEMOVEMENTRATIO = 5.4
     baseMovementSpeed = np.int((dimDensity ** 2) / (4000 * 6000) * BASEMOVEMENTRATIO)
