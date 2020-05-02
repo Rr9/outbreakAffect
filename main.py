@@ -1,8 +1,10 @@
 import math
 import random
+import time
 
 import matplotlib
 import matplotlib.animation as animation
+import numpy as np
 
 from dataStaticGrapher import *
 from hospital import Hospital
@@ -241,18 +243,20 @@ def setupWrite():       # write || Write&Show
     fwriter = csv.DictWriter(rfile, delimiter=',', fieldnames=fieldnames)
     FILEWRITER = fwriter
     fwriter.writeheader()
-    return FILEWRITER, rfile, filename
+    return FILEWRITER, rfile, resutsFileName
 
 def main():
-    global SHOW; global WRITE; global HOMEKIT;
+    global SHOW; global WRITE; global HOMEKIT; global NUMPERSONS; global POPDENSITY; global dimDensity;
 
-    SHOW = False
+    SHOW = True
     WRITE = True
     HOMEKIT = False
 
     startpercentage = 0.0023562754370643774
     POPDENSITY = 3  # KiloPX^2
     numpersons = 3000
+    NUMPERSONS = numpersons
+
 
     dimDensity = math.sqrt(NUMPERSONS / POPDENSITY) * 1000
 
@@ -278,6 +282,8 @@ def main():
     global scatter; global fig; global outsideText; global insideText; global noninfText; global infectedText; global curedText; global deadText; global FILEWRITER;
     scatter, fig, outsideText, insideText, noninfText, infectedText, curedText, deadText = setupShow() if SHOW else [None for i in range(8)]
     FILEWRITER, rfile, filename = setupWrite() if WRITE else [None, None]
+
+    print(filename)
 
     if SHOW:  #Write&|Show
         ani = animation.FuncAnimation(fig, anim,  interval=1, frames=1, blit=False)

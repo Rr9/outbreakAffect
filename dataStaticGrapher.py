@@ -4,9 +4,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-filename = "rr/hs4.csv"
+
+# filename = "rr/hs4.csv"
 # def staticGraph(w=w,x=x,y=y,z=z):
-def staticGraph(filename = filename):
+def staticGraph(filename):
 
     with open(filename) as csvDataFile:
         reader = csv.reader(csvDataFile)
