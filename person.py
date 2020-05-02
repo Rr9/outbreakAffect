@@ -28,7 +28,7 @@ class Person():
 
     midlinewidth = 15
 
-    def __init__(self, infectionState, xlim, ylim, divider, homekit=False, deviderWidth=5, size=10, baseRadius=20): #infectionProbOverride=0
+    def __init__(self, infectionState, xlim, ylim, divider, homekit=False, deviderWidth=5, size=2, baseRadius=20): #infectionProbOverride=0
         self.inf = infectionState
         # 0-Uninfected, 1-Undiagnosable, 2-Asymptomatic, 3-Symptomatic 4-Recovered
         self.age = 0            # days this person has lived for

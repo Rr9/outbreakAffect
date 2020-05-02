@@ -1,12 +1,11 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
-import pandas as pd
-import time
-import sys
 import csv
 
-filename = sys.argv[1]
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+
+filename = "results/HOSPITAL MARK.csv"
+
 with open(filename) as csvDataFile:
     reader = csv.reader(csvDataFile)
     next(reader)

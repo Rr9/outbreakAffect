@@ -83,10 +83,10 @@ def multigraph(la, lb, distances):
 
         redness = map(distances[i], mnColor, mxColor, 0.75, 1) if len(lb)>1 else 0.75
 
-        plt.plot(range(len(lb[i])), lb[i], color=[redness, 0, 1-redness])
+        plt.plot(range(len(lb[i])), lb[i], color=[redness, 0, 1-redness], linewidth=1.0)
 
     # plot two graphs to compare
-    plt.plot(range(len(la)), la, 'b')
+    plt.plot(range(len(la)), la, 'xkcd:pale lime', linewidth=6.0)
     plt.show()
 
 def map(x, in_min, in_max, out_min, out_max):

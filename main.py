@@ -1,14 +1,10 @@
-import csv
 import math
 import random
-import time
 
 import matplotlib
 import matplotlib.animation as animation
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
 
+from dataStaticGrapher import *
 from hospital import Hospital
 from person import Person
 
@@ -35,10 +31,10 @@ RIGHTMIDDLE = DIVIDERLOC+(XAXIS-DIVIDERLOC)//2
 BASEMOVEMENTRATIO = 5
 BASEMOVEMENTSPEED = (dimDensity**2)/((4000*6000))*BASEMOVEMENTRATIO
 
-DOTSIZE = 20#XAXIS*YAXIS//(NUMPERSONS**2)#
+DOTSIZE = 10#XAXIS*YAXIS//(NUMPERSONS**2)#
 COLORS = ['g', 'gold', 'tab:orange', 'r', 'blue', 'k']
 INFECTIONRAD = 100  #
-HOMEKIT = False
+HOMEKIT = True
 SHOW = True
 WRITE = True
 
@@ -245,9 +241,15 @@ def setupWrite():       # write || Write&Show
     fwriter = csv.DictWriter(rfile, delimiter=',', fieldnames=fieldnames)
     FILEWRITER = fwriter
     fwriter.writeheader()
-    return FILEWRITER, rfile
+    return FILEWRITER, rfile, filename
 
 def main():
+    global SHOW; global WRITE; global HOMEKIT;
+
+    SHOW = False
+    WRITE = True
+    HOMEKIT = False
+
     startpercentage = 0.0023562754370643774
     POPDENSITY = 3  # KiloPX^2
     numpersons = 3000
@@ -266,6 +268,7 @@ def main():
     asymDays = np.uint8(14 * day)
     symDays = np.uint8(15 * day)
     hosp = math.ceil(3.2 * (numpersons / 1000) * 1)
+    hospital.setCapacity(hosp)
 
     initInfection = spawn(NUMPERSONS, infectionStart, infectionProb, baseRadius, day, undiagDays, asymDays, symDays,
                           baseMovementSpeed=baseMovementSpeed)
@@ -274,7 +277,7 @@ def main():
 
     global scatter; global fig; global outsideText; global insideText; global noninfText; global infectedText; global curedText; global deadText; global FILEWRITER;
     scatter, fig, outsideText, insideText, noninfText, infectedText, curedText, deadText = setupShow() if SHOW else [None for i in range(8)]
-    FILEWRITER, rfile = setupWrite() if WRITE else [None, None]
+    FILEWRITER, rfile, filename = setupWrite() if WRITE else [None, None]
 
     if SHOW:  #Write&|Show
         ani = animation.FuncAnimation(fig, anim,  interval=1, frames=1, blit=False)
@@ -284,6 +287,8 @@ def main():
             anim(0)
     if WRITE:
         rfile.close()
+
+    staticGraph(filename)
 
 if __name__ == "__main__":
     main()
